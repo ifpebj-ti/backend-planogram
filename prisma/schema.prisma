@@ -18,9 +18,9 @@ model Usuario {
   nome           String
   email          String       @unique
   senha          String
-  nivel_de_acesso NivelDeAcesso // Mover o nível de acesso aqui
-  produtos       Produto[]    // Relacionamento 1:N (Um usuário pode cadastrar vários produtos)
-  categorias     Categoria[]   // Relacionamento 1:N (Um usuário pode criar várias categorias)
+  nivel_de_acesso NivelDeAcesso 
+  produtos       Produto[]    
+  categorias     Categoria[]   
 }
 
 model Produto {
@@ -41,7 +41,7 @@ model Categoria {
   venda_total_dia Int
   id_prateleira  Int
   prateleira     Prateleira @relation(fields: [id_prateleira], references: [id])
-  produtos       Produto[]  // Relacionamento 1:N (Uma categoria pode ter vários produtos)
+  produtos       Produto[]  
   usuarioId      Int
   usuario        Usuario    @relation(fields: [usuarioId], references: [id]) // Relacionamento com usuário
 }
@@ -49,7 +49,7 @@ model Categoria {
 model Prateleira {
   id             Int        @id @default(autoincrement())
   nome           String
-  categorias     Categoria[] // Relacionamento 1:N (Uma prateleira pode ter várias categorias)
+  categorias     Categoria[] 
 }
 
 enum NivelDeAcesso {

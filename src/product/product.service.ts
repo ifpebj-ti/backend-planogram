@@ -1,5 +1,3 @@
-// src/product/product.service.ts
-
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 

@@ -1,5 +1,3 @@
-// src/category/category.controller.ts
-
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { CategoryService } from './category.service';
 
@@ -9,7 +7,7 @@ export class CategoryController {
 
   @Get()
   async getCategories() {
-    return this.categoryService.getAllCategories(); // Certifique-se de que este método agora existe
+    return this.categoryService.getAllCategories(); 
   }
 
   @Post()
