@@ -1,6 +1,6 @@
 # Backend - Planograma
 ## Introdução
-Este repositório contém o backend do sistema Planograma das Farmácias Cavalcante. A aplicação visa aprimorar o layout e a distribuição dos produtos nas prateleiras, visando aumentar as vendas e a eficiência operacional, considerando o controle básico de estoque por slots dos produtos.
+Este repositório contém o backend do sistema Planograma para Farmácias. A aplicação visa aprimorar o layout e a distribuição dos produtos nas prateleiras, visando aumentar as vendas e a eficiência operacional, considerando o controle básico de estoque por slots dos produtos.
 
 ## Tecnologias
 As tecnologias utilizadas para o desenvolvimento são: Node.js (Servidor) - NestJS (Framework) - TypeScript (Linguagem de programação) - PostgreSQL (Banco de dados) - Prisma (ORM)
