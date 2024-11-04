@@ -10,6 +10,11 @@ export class CategoryController {
     return this.categoryService.getAllCategories();
   }
 
+  @Get(':id')
+  async getCategoryById(@Param('id') id: string) {
+    return this.categoryService.getCategoryById(id);
+  }
+
   @Post()
   async createCategory(@Body() body: { nome: string; venda_total_dia: number; prateleiraId: number; usuarioId: number }) {
     return this.categoryService.createCategory(body);
