@@ -13,12 +13,11 @@ module.exports = [
     },
     rules: {
       '@typescript-eslint/interface-name-prefix': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'warn', // Altere para 'warn' para obter avisos
+      '@typescript-eslint/explicit-function-return-type': 'warn', 
       '@typescript-eslint/explicit-module-boundary-types': 'warn',
       '@typescript-eslint/no-explicit-any': 'warn',
-      // Outras regras podem ser adicionadas aqui
     },
-    files: ['src/**/*.{ts,tsx}', 'test/**/*.{ts,tsx}'], // Aplica as regras em 'src' e 'test'
+    files: ['src/**/*.{ts,tsx}', 'test/**/*.{ts,tsx}'],
     ignores: ['dist'],
   },
   require('eslint-config-prettier'),
