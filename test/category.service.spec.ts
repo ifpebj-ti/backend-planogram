@@ -1,7 +1,6 @@
-// __tests__/category.service.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
-import { CategoryService } from '../src/category/category.service'; // Ajuste o caminho conforme necessário
-import { PrismaService } from '../src/prisma.service'; // Ajuste o caminho conforme necessário
+import { CategoryService } from '../src/category/category.service'; 
+import { PrismaService } from '../src/prisma.service'; 
 
 const mockPrismaService = {
   categoria: {

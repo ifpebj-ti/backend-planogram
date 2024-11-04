@@ -1,7 +1,6 @@
-// __tests__/product.controller.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
-import { ProductController } from '../src/product/product.controller'; // Ajuste o caminho conforme necessário
-import { ProductService } from '../src/product/product.service'; // Ajuste o caminho conforme necessário
+import { ProductController } from '../src/product/product.controller';
+import { ProductService } from '../src/product/product.service';
 
 const mockProductService = {
   createProduct: jest.fn(),

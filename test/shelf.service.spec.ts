@@ -1,7 +1,6 @@
-// __tests__/shelf.service.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
-import { ShelfService } from '../src/shelf/shelf.service'; // Ajuste o caminho conforme necessário
-import { PrismaService } from '../src/prisma.service'; // Ajuste o caminho conforme necessário
+import { ShelfService } from '../src/shelf/shelf.service'; 
+import { PrismaService } from '../src/prisma.service'; 
 
 const mockPrismaService = {
   prateleira: {

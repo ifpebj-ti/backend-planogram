@@ -1,8 +1,7 @@
-// __tests__/user.controller.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserController } from '../src/user/user.controller'; // Ajuste o caminho conforme necessário
-import { UserService } from '../src/user/user.service'; // Ajuste o caminho conforme necessário
-import { NivelDeAcesso } from '@prisma/client'; // Ajuste o caminho conforme necessário
+import { UserController } from '../src/user/user.controller'; 
+import { UserService } from '../src/user/user.service'; 
+import { NivelDeAcesso } from '@prisma/client'; 
 
 const mockUserService = {
   createUser: jest.fn(),

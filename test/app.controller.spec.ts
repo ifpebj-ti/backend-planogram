@@ -1,7 +1,6 @@
-// __tests__/app.controller.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppController } from '../src/app.controller'; // Ajuste o caminho conforme necessário
-import { AppService } from '../src/app.service'; // Ajuste o caminho conforme necessário
+import { AppController } from '../src/app.controller'; 
+import { AppService } from '../src/app.service'; 
 
 const mockAppService = {
   getHello: jest.fn(() => 'Hello World!'),

@@ -1,7 +1,6 @@
-// __tests__/category.controller.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
-import { CategoryController } from '../src/category/category.controller'; // Ajuste o caminho conforme necessário
-import { CategoryService } from '../src/category/category.service'; // Ajuste o caminho conforme necessário
+import { CategoryController } from '../src/category/category.controller';
+import { CategoryService } from '../src/category/category.service';
 
 const mockCategoryService = {
   getAllCategories: jest.fn(),

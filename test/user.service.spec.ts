@@ -1,7 +1,6 @@
-// __tests__/user.service.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserService } from '../src/user/user.service'; // Ajuste o caminho conforme necessário
-import { PrismaService } from '../src/prisma.service'; // Ajuste o caminho conforme necessário
+import { UserService } from '../src/user/user.service'; 
+import { PrismaService } from '../src/prisma.service'; 
 import { NivelDeAcesso } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 

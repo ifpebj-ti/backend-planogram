@@ -1,7 +1,6 @@
-// __tests__/shelf.controller.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
-import { ShelfController } from '../src/shelf/shelf.controller'; // Ajuste o caminho conforme necessário
-import { ShelfService } from '../src/shelf/shelf.service'; // Ajuste o caminho conforme necessário
+import { ShelfController } from '../src/shelf/shelf.controller'; 
+import { ShelfService } from '../src/shelf/shelf.service'; 
 
 const mockShelfService = {
   createShelf: jest.fn(),
