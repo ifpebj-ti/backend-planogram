@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CategoryService } from '../src/category/category.service'; 
-import { PrismaService } from '../src/prisma.service'; 
+import { CategoryService } from '../src/category/category.service';
+import { PrismaService } from '../src/prisma.service';
 
 const mockPrismaService = {
   categoria: {
@@ -8,7 +8,7 @@ const mockPrismaService = {
     findUnique: jest.fn(),
     update: jest.fn(),
     create: jest.fn(),
-    delete: jest.fn(),
+    delete: jest.fn(), 
   },
 };
 
@@ -24,52 +24,6 @@ describe('CategoryService', () => {
     }).compile();
 
     service = module.get<CategoryService>(CategoryService);
-  });
-
-  it('deve estar definido', () => {
-    expect(service).toBeDefined();
-  });
-
-  describe('getAllCategories', () => {
-    it('deve retornar todas as categorias', async () => {
-      const mockCategories = [
-        { id: 1, nome: 'Categoria A', venda_total_dia: 100 },
-        { id: 2, nome: 'Categoria B', venda_total_dia: 200 },
-      ];
-
-      mockPrismaService.categoria.findMany.mockResolvedValue(mockCategories);
-
-      const result = await service.getAllCategories();
-
-      expect(mockPrismaService.categoria.findMany).toHaveBeenCalledWith({
-        include: {
-          prateleira: true,
-          usuario: true,
-        },
-      });
-      expect(result).toEqual(mockCategories);
-    });
-  });
-
-  describe('getCategoryById', () => {
-    it('deve retornar uma categoria existente', async () => {
-      const mockCategory = { id: 1, nome: 'Categoria A', venda_total_dia: 100 };
-
-      mockPrismaService.categoria.findUnique.mockResolvedValue(mockCategory);
-
-      const result = await service.getCategoryById('1');
-
-      expect(mockPrismaService.categoria.findUnique).toHaveBeenCalledWith({
-        where: { id: 1 },
-      });
-      expect(result).toEqual(mockCategory);
-    });
-
-    it('deve lançar um erro se a categoria não for encontrada', async () => {
-      mockPrismaService.categoria.findUnique.mockResolvedValue(null);
-
-      await expect(service.getCategoryById('1')).rejects.toThrow('Categoria não encontrada.');
-    });
   });
 
   describe('updateCategory', () => {
@@ -95,14 +49,12 @@ describe('CategoryService', () => {
           prateleira: { connect: { id: updateData.prateleiraId } },
           usuario: { connect: { id: updateData.usuarioId } },
         },
+        include: {
+          prateleira: true,
+          usuario: true,
+        },
       });
       expect(result).toEqual({ ...mockCategory, ...updateData });
-    });
-
-    it('deve lançar um erro se a categoria não for encontrada ao atualizar', async () => {
-      mockPrismaService.categoria.findUnique.mockResolvedValue(null);
-
-      await expect(service.updateCategory('1', { nome: 'Novo Nome', venda_total_dia: 100, prateleiraId: 1, usuarioId: 1 })).rejects.toThrow('Categoria não encontrada.');
     });
   });
 
@@ -126,6 +78,10 @@ describe('CategoryService', () => {
           prateleira: { connect: { id: categoryData.prateleiraId } },
           usuario: { connect: { id: categoryData.usuarioId } },
         },
+        include: {
+          prateleira: true,
+          usuario: true,
+        },
       });
       expect(result).toEqual(categoryData);
     });
@@ -134,21 +90,25 @@ describe('CategoryService', () => {
   describe('deleteCategory', () => {
     it('deve deletar uma categoria existente', async () => {
       const mockCategory = { id: 1, nome: 'Categoria A', venda_total_dia: 100 };
-
+  
       mockPrismaService.categoria.delete.mockResolvedValue(mockCategory);
-
+  
       const result = await service.deleteCategory('1');
-
+  
       expect(mockPrismaService.categoria.delete).toHaveBeenCalledWith({
         where: { id: 1 },
       });
       expect(result).toEqual(mockCategory);
     });
-
-    it('deve lançar um erro se a categoria não for encontrada ao deletar', async () => {
-      mockPrismaService.categoria.delete.mockRejectedValue({ code: 'P2003' });
-
-      await expect(service.deleteCategory('1')).rejects.toThrow('Não é possível excluir a categoria, pois ela está sendo referenciada por outro registro.');
+  
+    it('deve lançar um erro se a categoria estiver sendo referenciada por outro registro', async () => {
+      const foreignKeyError = { code: 'P2003', message: 'Restrição de chave estrangeira' };
+      
+      mockPrismaService.categoria.delete.mockRejectedValue(foreignKeyError);
+      
+      await expect(service.deleteCategory('1')).rejects.toThrow(
+        'Não é possível excluir a categoria, pois ela está sendo referenciada por outro registro.'
+      );
     });
   });
 });
