@@ -82,7 +82,8 @@ export class UserService {
         throw new Error('Usuário não encontrado');
       }
 
-      const updateData: any = {};
+      const updateData: { nome?: string; email?: string; nivel_de_acesso?: NivelDeAcesso } = {};
+
       if (data.nome) updateData.nome = data.nome;
       if (data.email) updateData.email = data.email;
       if (data.nivel_de_acesso) updateData.nivel_de_acesso = data.nivel_de_acesso;
