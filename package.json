@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "",
   "author": "",
-  "type": "module",
+  "type": "commonjs",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
