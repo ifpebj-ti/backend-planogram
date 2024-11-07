@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 
-interface Categoria {
+export interface Categoria {
   id: number;
   nome: string;
   venda_total_dia: number;
