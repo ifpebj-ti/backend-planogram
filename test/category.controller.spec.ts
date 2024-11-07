@@ -108,15 +108,14 @@ describe('CategoryController', () => {
 
   describe('deleteCategory', () => {
     it('deve deletar uma categoria existente', async () => {
-      const mockCategory = { id: 1, nome: 'Categoria A' };
-
-      mockCategoryService.deleteCategory.mockResolvedValue(mockCategory);
-
+      mockCategoryService.deleteCategory.mockResolvedValue(undefined);
+    
       const result = await controller.deleteCategory('1');
-
+    
       expect(mockCategoryService.deleteCategory).toHaveBeenCalledWith('1');
-      expect(result).toEqual(mockCategory);
+      expect(result).toBeUndefined(); 
     });
+    
 
     it('deve lançar um erro se a categoria não for encontrada ao deletar', async () => {
       mockCategoryService.deleteCategory.mockRejectedValue(new Error('Não é possível excluir a categoria, pois ela está sendo referenciada por outro registro.'));

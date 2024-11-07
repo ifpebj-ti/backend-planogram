@@ -41,7 +41,6 @@ describe('UserService', () => {
         nivel_de_acesso: NivelDeAcesso.admin,
       };
 
-      // Mock do hash e do retorno do Prisma
       jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashedPassword');
       mockPrismaService.usuario.create.mockResolvedValue(userData);
 
