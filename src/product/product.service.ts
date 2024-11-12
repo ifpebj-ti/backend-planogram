@@ -1,11 +1,30 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import { ImportarPlanilhaService } from './importar-planilha.service'; 
 
 @Injectable()
 export class ProductService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(forwardRef(() => ImportarPlanilhaService))  
+    private readonly importarPlanilhaService: ImportarPlanilhaService,
+    private readonly prisma: PrismaService,  
+  ) { }
 
   async createProduct(data: { nome: string; id_categoria: number; preco: number; fornecedor: string; venda_por_dia: number; usuarioId: number }) {
+    const categoria = await this.prisma.categoria.findUnique({
+      where: { id: data.id_categoria },
+    });
+    if (!categoria) {
+      throw new Error('Categoria não encontrada');
+    }
+
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id: data.usuarioId },
+    });
+    if (!usuario) {
+      throw new Error('Usuário não encontrado');
+    }
+
     return this.prisma.produto.create({
       data: {
         nome: data.nome,
@@ -28,15 +47,22 @@ export class ProductService {
   }
 
   async getProductById(id: string) {
+    const productId = parseInt(id); 
+    if (isNaN(productId)) {
+      throw new Error('ID inválido');
+    }
+    
     const product = await this.prisma.produto.findUnique({
-      where: { id: Number(id) },
+      where: { id: productId },
     });
+    
     if (!product) {
       throw new Error('Produto não encontrado.');
     }
+    
     return product;
   }
-
+  
   async updateProduct(id: string, data: { nome: string; id_categoria: number; preco: number; fornecedor: string; venda_por_dia: number; usuarioId: number }) {
     try {
       const product = await this.getProductById(id);
@@ -53,7 +79,7 @@ export class ProductService {
       });
     } catch (error) {
       if (error.code === 'P2025') {
-        throw new Error('Produto não encontrado para atualização.');
+        throw new Error('Produto não encontrado.');
       }
       throw error;
     }

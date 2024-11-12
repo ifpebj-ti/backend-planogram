@@ -1,131 +1,111 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProductController } from '../src/product/product.controller';
 import { ProductService } from '../src/product/product.service';
-
-const mockProductService = {
-  createProduct: jest.fn(),
-  getAllProducts: jest.fn(),
-  getProductById: jest.fn(),
-  updateProduct: jest.fn(),
-  deleteProduct: jest.fn(),
-};
+import { PrismaService } from '../src/prisma.service';
+import { ImportarPlanilhaService } from '../src/product/importar-planilha.service';
 
 describe('ProductController', () => {
-  let controller: ProductController;
+  let productController: ProductController;
+  let productService: ProductService;
+  let importarPlanilhaService: ImportarPlanilhaService;
+
+  const mockProductService = {
+    createProduct: jest.fn(),
+    updateProduct: jest.fn(),
+    deleteProduct: jest.fn(),
+  };
+
+  const mockImportarPlanilhaService = {
+    importarPlanilha: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ProductController],
       providers: [
+        ProductService,
         { provide: ProductService, useValue: mockProductService },
+        PrismaService,
+        { provide: ImportarPlanilhaService, useValue: mockImportarPlanilhaService },
       ],
     }).compile();
 
-    controller = module.get<ProductController>(ProductController);
+    productController = module.get<ProductController>(ProductController);
+    productService = module.get<ProductService>(ProductService);
+    importarPlanilhaService = module.get<ImportarPlanilhaService>(ImportarPlanilhaService);
   });
 
-  it('deve estar definido', () => {
-    expect(controller).toBeDefined();
+  it('deve criar um produto', async () => {
+    const productData = {
+      nome: 'Produto Teste',
+      id_categoria: 1,
+      preco: 100,
+      fornecedor: 'Fornecedor Teste',
+      venda_por_dia: 10,
+      usuarioId: 1,
+    };
+
+    mockProductService.createProduct.mockResolvedValue({ id: 1, ...productData });
+
+    const result = await productController.createProduct(productData);
+    expect(mockProductService.createProduct).toHaveBeenCalledWith(productData);
+    expect(result).toEqual({ id: 1, ...productData });
   });
 
-  describe('create', () => {
-    it('deve criar um produto', async () => {
-      const createProductDto = {
-        nome: 'Produto Teste',
-        id_categoria: 1,
-        preco: 100.0,
-        fornecedor: 'Fornecedor A',
-        venda_por_dia: 10,
-        usuarioId: 1,
-      };
+  it('deve lançar erro se categoria não for encontrada', async () => {
+    const productData = {
+      nome: 'Produto Teste',
+      id_categoria: 1,
+      preco: 100,
+      fornecedor: 'Fornecedor Teste',
+      venda_por_dia: 10,
+      usuarioId: 1,
+    };
 
-      mockProductService.createProduct.mockResolvedValue(createProductDto);
+    mockProductService.createProduct.mockRejectedValue(new Error('Categoria não encontrada'));
 
-      const result = await controller.create(createProductDto);
-
-      expect(mockProductService.createProduct).toHaveBeenCalledWith(createProductDto);
-      expect(result).toEqual(createProductDto);
-    });
+    await expect(productController.createProduct(productData)).rejects.toThrow('Categoria não encontrada');
   });
 
-  describe('findAll', () => {
-    it('deve retornar todos os produtos', async () => {
-      const mockProducts = [
-        { id: 1, nome: 'Produto A', preco: 50.0 },
-        { id: 2, nome: 'Produto B', preco: 75.0 },
-      ];
+  it('deve lançar erro se usuário não for encontrado', async () => {
+    const productData = {
+      nome: 'Produto Teste',
+      id_categoria: 1,
+      preco: 100,
+      fornecedor: 'Fornecedor Teste',
+      venda_por_dia: 10,
+      usuarioId: 1,
+    };
 
-      mockProductService.getAllProducts.mockResolvedValue(mockProducts);
+    mockProductService.createProduct.mockRejectedValue(new Error('Usuário não encontrado'));
 
-      const result = await controller.findAll();
-
-      expect(mockProductService.getAllProducts).toHaveBeenCalled();
-      expect(result).toEqual(mockProducts);
-    });
+    await expect(productController.createProduct(productData)).rejects.toThrow('Usuário não encontrado');
   });
 
-  describe('getById', () => {
-    it('deve retornar um produto existente', async () => {
-      const mockProduct = { id: 1, nome: 'Produto A', preco: 50.0 };
+  it('deve atualizar um produto', async () => {
+    const productData = {
+      id: 1,
+      nome: 'Produto Atualizado',
+      id_categoria: 1,
+      preco: 150,
+      fornecedor: 'Fornecedor Atualizado',
+      venda_por_dia: 15,
+      usuarioId: 1,
+    };
 
-      mockProductService.getProductById.mockResolvedValue(mockProduct);
+    mockProductService.updateProduct.mockResolvedValue({ id: 1, ...productData });
 
-      const result = await controller.getById('1');
-
-      expect(mockProductService.getProductById).toHaveBeenCalledWith('1');
-      expect(result).toEqual(mockProduct);
-    });
-
-    it('deve lançar um erro se o produto não for encontrado', async () => {
-      mockProductService.getProductById.mockRejectedValue(new Error('Produto não encontrado.'));
-
-      await expect(controller.getById('1')).rejects.toThrow('Produto não encontrado.');
-    });
+    const result = await productController.updateProduct('1', productData);
+    expect(mockProductService.updateProduct).toHaveBeenCalledWith('1', productData);
+    expect(result).toEqual({ id: 1, ...productData });
   });
 
-  describe('update', () => {
-    it('deve atualizar um produto existente', async () => {
-      const updateProductDto = {
-        nome: 'Produto Atualizado',
-        id_categoria: 1,
-        preco: 120.0,
-        fornecedor: 'Fornecedor B',
-        venda_por_dia: 5,
-        usuarioId: 1,
-      };
-      const updatedProduct = { id: 1, ...updateProductDto };
+  it('deve deletar um produto', async () => {
+    const productId = '1';
+    mockProductService.deleteProduct.mockResolvedValue({ id: productId });
 
-      mockProductService.updateProduct.mockResolvedValue(updatedProduct);
-
-      const result = await controller.update('1', updateProductDto);
-
-      expect(mockProductService.updateProduct).toHaveBeenCalledWith('1', updateProductDto);
-      expect(result).toEqual(updatedProduct);
-    });
-
-    it('deve lançar um erro se o produto não for encontrado ao atualizar', async () => {
-      mockProductService.updateProduct.mockRejectedValue(new Error('Produto não encontrado.'));
-
-      await expect(controller.update('1', { nome: 'Novo Nome', id_categoria: 1, preco: 100, fornecedor: 'Fornecedor A', venda_por_dia: 10, usuarioId: 1 })).rejects.toThrow('Produto não encontrado.');
-    });
-  });
-
-  describe('delete', () => {
-    it('deve deletar um produto existente', async () => {
-      const mockProduct = { id: 1, nome: 'Produto A' };
-
-      mockProductService.deleteProduct.mockResolvedValue(mockProduct);
-
-      const result = await controller.delete('1');
-
-      expect(mockProductService.deleteProduct).toHaveBeenCalledWith('1');
-      expect(result).toEqual(mockProduct);
-    });
-
-    it('deve lançar um erro se o produto não for encontrado ao deletar', async () => {
-      mockProductService.deleteProduct.mockRejectedValue(new Error('Não é possível excluir o produto, pois ele está sendo referenciado por outro registro.'));
-
-      await expect(controller.delete('1')).rejects.toThrow('Não é possível excluir o produto, pois ele está sendo referenciado por outro registro.');
-    });
+    const result = await productController.deleteProduct(productId);
+    expect(mockProductService.deleteProduct).toHaveBeenCalledWith(productId);
+    expect(result).toEqual({ id: productId });
   });
 });

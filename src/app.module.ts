@@ -11,10 +11,11 @@ import { UserService } from './user/user.service';
 import { ProductService } from './product/product.service';
 import { CategoryService } from './category/category.service';
 import { PrismaService } from './prisma.service';
+import { ImportarPlanilhaService } from './product/importar-planilha.service';
 
 @Module({
   imports: [CategoryModule, ProductModule, UserModule, ShelfModule], 
   controllers: [UserController, ProductController, ShelfController],  
-  providers: [UserService, ProductService, CategoryService, PrismaService],  
+  providers: [UserService, ProductService, CategoryService, PrismaService, ImportarPlanilhaService],  
 })
 export class AppModule {}
