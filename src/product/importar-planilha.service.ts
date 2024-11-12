@@ -1,11 +1,10 @@
 import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
 import * as XLSX from 'xlsx';
-import { ProductService } from './product.service'; // Importação do ProductService
-
+import { ProductService } from './product.service'; 
 @Injectable()
 export class ImportarPlanilhaService {
   constructor(
-    @Inject(forwardRef(() => ProductService))  // Garantir que forwardRef() está aqui também
+    @Inject(forwardRef(() => ProductService))  
     private readonly productService: ProductService,
   ) {}
 
