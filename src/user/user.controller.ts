@@ -4,7 +4,12 @@ import { NivelDeAcesso } from '@prisma/client';
 
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
+
+  @Post('bulk')
+  async createUsers(@Body() users: { nome: string; email: string; senha: string; nivel_de_acesso: NivelDeAcesso }[]) {
+    return this.userService.createUsers(users);
+  }
 
   @Post()
   async createUser(@Body() data: { nome: string; email: string; senha: string; nivel_de_acesso: NivelDeAcesso }) {

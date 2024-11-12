@@ -5,9 +5,13 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async createUser(data: { nome: string; email: string; senha: string; nivel_de_acesso: NivelDeAcesso }) {
+    if (!data.senha) {
+      throw new Error('Senha não fornecida');
+    }
+
     const hashedPassword = await bcrypt.hash(data.senha, 10);
     return this.prisma.usuario.create({
       data: {
@@ -19,13 +23,19 @@ export class UserService {
     });
   }
 
-  async createUsers(users: Array<{ nome: string; email: string; senha: string; nivel_de_acesso: NivelDeAcesso }>) {
-    const userCreationPromises = users.map(async (user) => {
-      const hashedPassword = await bcrypt.hash(user.senha, 10);
-      return this.createUser({ ...user, senha: hashedPassword });
-    });
-    return Promise.all(userCreationPromises);
+  async createUsers(users: { nome: string; email: string; senha: string; nivel_de_acesso: NivelDeAcesso }[]) {
+    const createdUsers = [];
+    for (const user of users) {
+      try {
+        const createdUser = await this.createUser(user); 
+        createdUsers.push(createdUser);
+      } catch (error) {
+        console.error(`Erro ao criar usuário ${user.nome}: ${error.message}`);
+      }
+    }
+    return createdUsers;
   }
+
 
   async getAllUsers() {
     return this.prisma.usuario.findMany({
@@ -37,32 +47,26 @@ export class UserService {
   }
 
   async getUserById(id: string) {
-    try {
-      const user = await this.prisma.usuario.findUnique({
-        where: { id: Number(id) },
-        include: {
-          produtos: true,
-          categorias: true,
-        },
-      });
+    const numericId = Number(id); 
+    if (isNaN(numericId)) throw new Error('ID inválido');
 
-      if (!user) {
-        throw new Error('Usuário não encontrado');
-      }
+    const user = await this.prisma.usuario.findUnique({
+      where: { id: numericId },
+      include: {
+        produtos: true,
+        categorias: true,
+      },
+    });
 
-      return user;
-    } catch (error) {
-      throw new Error(`Erro ao buscar usuário: ${error.message}`);
-    }
+    if (!user) throw new Error('Usuário não encontrado');
+    return user;
   }
 
   async deleteUser(id: string) {
-    try {
-      const user = await this.getUserById(id);
-      if (!user) {
-        throw new Error('Usuário não encontrado');
-      }
+    const user = await this.getUserById(id);
+    if (!user) throw new Error('Usuário não encontrado');
 
+    try {
       return await this.prisma.usuario.delete({
         where: { id: Number(id) },
       });
@@ -70,24 +74,24 @@ export class UserService {
       if (error.code === 'P2003') {
         throw new Error('Não é possível deletar o usuário, pois ele está associado a outros registros.');
       }
-
       throw new Error(`Erro ao deletar usuário: ${error.message}`);
     }
   }
 
-  async updateUser(id: string, data: { nome?: string; email?: string; nivel_de_acesso?: NivelDeAcesso }) {
+  async updateUser(id: string, data: { nome?: string; email?: string; senha?: string; nivel_de_acesso?: NivelDeAcesso }) {
+    const user = await this.getUserById(id);
+    if (!user) throw new Error('Usuário não encontrado');
+
+    const updateData: { nome?: string; email?: string; senha?: string; nivel_de_acesso?: NivelDeAcesso } = {};
+
+    if (data.nome) updateData.nome = data.nome;
+    if (data.email) updateData.email = data.email;
+    if (data.nivel_de_acesso) updateData.nivel_de_acesso = data.nivel_de_acesso;
+    if (data.senha) {
+      updateData.senha = await bcrypt.hash(data.senha, 10); 
+    }
+
     try {
-      const user = await this.getUserById(id);
-      if (!user) {
-        throw new Error('Usuário não encontrado');
-      }
-
-      const updateData: { nome?: string; email?: string; nivel_de_acesso?: NivelDeAcesso } = {};
-
-      if (data.nome) updateData.nome = data.nome;
-      if (data.email) updateData.email = data.email;
-      if (data.nivel_de_acesso) updateData.nivel_de_acesso = data.nivel_de_acesso;
-
       return await this.prisma.usuario.update({
         where: { id: Number(id) },
         data: updateData,
@@ -96,7 +100,6 @@ export class UserService {
       if (error.code === 'P2025') {
         throw new Error('Não foi possível atualizar, usuário não encontrado.');
       }
-
       throw new Error(`Erro ao atualizar usuário: ${error.message}`);
     }
   }
