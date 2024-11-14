@@ -4,6 +4,8 @@ import { ProductController } from './product.controller';
 import { PrismaModule } from '../prisma.module';
 import { ImportarPlanilhaModule } from './importar-planilha.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { ImportarPlanilhaService } from './importar-planilha.service';
+import { PrismaService } from '../prisma.service';
 
 @Module({
   imports: [
@@ -14,7 +16,7 @@ import { MulterModule } from '@nestjs/platform-express';
     }),
   ],
   controllers: [ProductController],
-  providers: [ProductService],
-  exports: [ProductService],
+  providers: [ProductService, ImportarPlanilhaService, PrismaService],
+  exports: [ProductService, ImportarPlanilhaService],
 })
 export class ProductModule {}

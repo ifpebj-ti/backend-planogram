@@ -11,8 +11,17 @@ export class UserService {
     if (!data.senha) {
       throw new Error('Senha não fornecida');
     }
-
+  
+    const existingUser = await this.prisma.usuario.findUnique({
+      where: { email: data.email },
+    });
+  
+    if (existingUser) {
+      throw new Error('O email fornecido já está em uso.');
+    }
+  
     const hashedPassword = await bcrypt.hash(data.senha, 10);
+  
     return this.prisma.usuario.create({
       data: {
         nome: data.nome,
@@ -22,6 +31,7 @@ export class UserService {
       },
     });
   }
+  
 
   async createUsers(users: { nome: string; email: string; senha: string; nivel_de_acesso: NivelDeAcesso }[]) {
     const createdUsers = [];
