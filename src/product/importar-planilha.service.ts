@@ -1,38 +1,17 @@
-import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as XLSX from 'xlsx';
-import { ProductService } from './product.service'; 
+
 @Injectable()
 export class ImportarPlanilhaService {
-  constructor(
-    @Inject(forwardRef(() => ProductService))  
-    private readonly productService: ProductService,
-  ) {}
-
-  async importarPlanilha(filePath: string): Promise<{ success: boolean; message: string }> {
+  async importarPlanilha(fileBuffer: Buffer): Promise<any> {
     try {
-      const workbook = XLSX.readFile(filePath); 
-      const sheetName = workbook.SheetNames[0]; 
-      const sheet = workbook.Sheets[sheetName]; 
-      const data = XLSX.utils.sheet_to_json(sheet);
-      
-      if (!data || data.length === 0) {
-        throw new BadRequestException('Formato de planilha incorreto ou vazio.');
-      }
-
-      for (const item of data) {
-        await this.productService.createProduct({
-          nome: item['nome'],
-          id_categoria: item['id_categoria'],
-          preco: item['preco'],
-          fornecedor: item['fornecedor'],
-          venda_por_dia: item['venda_por_dia'],
-          usuarioId: item['usuarioId'],
-        });
-      }
-
-      return { success: true, message: 'Importação concluída com sucesso.' };
+      const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const json = XLSX.utils.sheet_to_json(worksheet);
+      return json;
     } catch (error) {
-      throw new BadRequestException('Erro ao importar a planilha: ' + error.message);
+      throw new Error('Erro ao processar o arquivo: ' + error.message);
     }
   }
 }

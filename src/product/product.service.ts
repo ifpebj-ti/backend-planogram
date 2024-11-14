@@ -1,16 +1,18 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { ImportarPlanilhaService } from './importar-planilha.service'; 
 
 @Injectable()
 export class ProductService {
-  constructor(
-    @Inject(forwardRef(() => ImportarPlanilhaService))  
-    private readonly importarPlanilhaService: ImportarPlanilhaService,
-    private readonly prisma: PrismaService,  
-  ) { }
+  constructor(private readonly prisma: PrismaService) {}
 
-  async createProduct(data: { nome: string; id_categoria: number; preco: number; fornecedor: string; venda_por_dia: number; usuarioId: number }) {
+  async createProduct(data: {
+    nome: string;
+    id_categoria: number;
+    preco: number;
+    fornecedor: string;
+    venda_por_dia: number;
+    usuarioId: number;
+  }) {
     const categoria = await this.prisma.categoria.findUnique({
       where: { id: data.id_categoria },
     });
@@ -37,6 +39,24 @@ export class ProductService {
     });
   }
 
+  async createProductsFromSheet(dataArray: any[]) {
+    const createdProducts = [];
+
+    for (const data of dataArray) {
+      const newProduct = await this.createProduct({
+        nome: data.nome,
+        id_categoria: data.id_categoria,
+        preco: data.preco,
+        fornecedor: data.fornecedor,
+        venda_por_dia: data.venda_por_dia,
+        usuarioId: data.usuarioId,
+      });
+      createdProducts.push(newProduct);
+    }
+
+    return createdProducts;
+  }
+
   async getAllProducts() {
     return this.prisma.produto.findMany({
       include: {
@@ -47,48 +67,51 @@ export class ProductService {
   }
 
   async getProductById(id: string) {
-    const productId = parseInt(id); 
+    const productId = parseInt(id);
     if (isNaN(productId)) {
       throw new Error('ID inválido');
     }
-    
+
     const product = await this.prisma.produto.findUnique({
       where: { id: productId },
     });
-    
+
     if (!product) {
       throw new Error('Produto não encontrado.');
     }
-    
+
     return product;
   }
-  
-  async updateProduct(id: string, data: { nome: string; id_categoria: number; preco: number; fornecedor: string; venda_por_dia: number; usuarioId: number }) {
-    try {
-      const product = await this.getProductById(id);
-      return this.prisma.produto.update({
-        where: { id: product.id },
-        data: {
-          nome: data.nome,
-          id_categoria: data.id_categoria,
-          preco: data.preco,
-          fornecedor: data.fornecedor,
-          venda_por_dia: data.venda_por_dia,
-          usuarioId: data.usuarioId,
-        },
-      });
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new Error('Produto não encontrado.');
-      }
-      throw error;
-    }
+
+  async updateProduct(
+    id: string,
+    data: {
+      nome: string;
+      id_categoria: number;
+      preco: number;
+      fornecedor: string;
+      venda_por_dia: number;
+      usuarioId: number;
+    },
+  ) {
+    const product = await this.getProductById(id);
+    return this.prisma.produto.update({
+      where: { id: product.id },
+      data: {
+        nome: data.nome,
+        id_categoria: data.id_categoria,
+        preco: data.preco,
+        fornecedor: data.fornecedor,
+        venda_por_dia: data.venda_por_dia,
+        usuarioId: data.usuarioId,
+      },
+    });
   }
 
-  async deleteProduct(id: string) {
+  async deleteProduct(productId: string): Promise<any> {
     try {
       return await this.prisma.produto.delete({
-        where: { id: Number(id) },
+        where: { id: Number(productId) },
       });
     } catch (error) {
       if (error.code === 'P2003') {

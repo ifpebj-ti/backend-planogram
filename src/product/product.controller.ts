@@ -1,19 +1,28 @@
-import { Controller, Post, Body, Get, Param, Put, Delete, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
+import {Controller, Post, Body, Get, Param, Put, Delete, UploadedFile, UseInterceptors,BadRequestException} from '@nestjs/common';
 import { ProductService } from './product.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ImportarPlanilhaService } from '../product/importar-planilha.service';
-import { Express } from 'express'; 
+import { ImportarPlanilhaService } from './importar-planilha.service';
+import { Express } from 'express';
 
 @Controller('produtos')
 export class ProductController {
-  [x: string]: any;
   constructor(
     private readonly productService: ProductService,
-    private readonly importarPlanilhaService: ImportarPlanilhaService
+    private readonly importarPlanilhaService: ImportarPlanilhaService,
   ) {}
 
   @Post()
-  async createProduct(@Body() createProductDto: { nome: string; id_categoria: number; preco: number; fornecedor: string; venda_por_dia: number; usuarioId: number }) {
+  async createProduct(
+    @Body()
+    createProductDto: {
+      nome: string;
+      id_categoria: number;
+      preco: number;
+      fornecedor: string;
+      venda_por_dia: number;
+      usuarioId: number;
+    },
+  ) {
     return this.productService.createProduct(createProductDto);
   }
 
@@ -28,7 +37,18 @@ export class ProductController {
   }
 
   @Put(':id')
-  async updateProduct(@Param('id') id: string, @Body() updateProductDto: { nome: string; id_categoria: number; preco: number; fornecedor: string; venda_por_dia: number; usuarioId: number }) {
+  async updateProduct(
+    @Param('id') id: string,
+    @Body()
+    updateProductDto: {
+      nome: string;
+      id_categoria: number;
+      preco: number;
+      fornecedor: string;
+      venda_por_dia: number;
+      usuarioId: number;
+    },
+  ) {
     return this.productService.updateProduct(id, updateProductDto);
   }
 
@@ -38,16 +58,16 @@ export class ProductController {
   }
 
   @Post('upload-planilha')
-  @UseInterceptors(FileInterceptor('planilha')) 
+  @UseInterceptors(FileInterceptor('planilha'))
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('Nenhum arquivo enviado');
     }
 
-    const filePath = file.path; 
-
     try {
-      const result = await this.importarPlanilhaService.importarPlanilha(filePath);
+      const jsonData = await this.importarPlanilhaService.importarPlanilha(file.buffer);
+
+      const result = await this.productService.createProductsFromSheet(jsonData);
       return result;
     } catch (error) {
       throw new BadRequestException(error.message);

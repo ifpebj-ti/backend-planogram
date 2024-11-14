@@ -47,10 +47,43 @@ export class CategoryService {
     return category;
   }
 
+  async createCategory(
+    data: { nome: string; venda_total_dia: number; prateleiraId?: number; usuarioId?: number }
+  ): Promise<Categoria> {
+    if (!data.prateleiraId || !data.usuarioId) {
+      throw new Error('Os IDs de prateleira e usuário são obrigatórios.');
+    }
+  
+    return this.prisma.categoria.create({
+      data: {
+        nome: data.nome,
+        venda_total_dia: data.venda_total_dia,
+        prateleira: {
+          connect: {
+            id: data.prateleiraId,
+          },
+        },
+        usuario: {
+          connect: {
+            id: data.usuarioId,
+          },
+        },
+      },
+      include: {
+        prateleira: true,
+        usuario: true,
+      },
+    });
+  }
+  
   async updateCategory(
     id: string,
-    data: { nome: string; venda_total_dia: number; prateleiraId: number; usuarioId: number }
+    data: { nome: string; venda_total_dia: number; prateleiraId?: number; usuarioId?: number }
   ): Promise<Categoria> {
+    if (!data.prateleiraId || !data.usuarioId) {
+      throw new Error('Os IDs de prateleira e usuário são obrigatórios.');
+    }
+  
     await this.getCategoryById(id);
     return this.prisma.categoria.update({
       where: {
@@ -77,31 +110,6 @@ export class CategoryService {
     });
   }
   
-
-  async createCategory(
-    data: { nome: string; venda_total_dia: number; prateleiraId: number; usuarioId: number }
-  ): Promise<Categoria> {
-    return this.prisma.categoria.create({
-      data: {
-        nome: data.nome,
-        venda_total_dia: data.venda_total_dia,
-        prateleira: {
-          connect: {
-            id: data.prateleiraId,
-          },
-        },
-        usuario: {
-          connect: {
-            id: data.usuarioId,
-          },
-        },
-      },
-      include: {
-        prateleira: true,
-        usuario: true,
-      },
-    });
-  }
 
   async deleteCategory(id: string) {
     try {
