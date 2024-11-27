@@ -6,9 +6,11 @@ import { ImportarPlanilhaModule } from './importar-planilha.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { ImportarPlanilhaService } from './importar-planilha.service';
 import { PrismaService } from '../prisma.service';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
+    AuthModule,
     PrismaModule,
     forwardRef(() => ImportarPlanilhaModule), 
     MulterModule.register({

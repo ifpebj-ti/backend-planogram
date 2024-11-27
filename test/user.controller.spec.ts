@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from '../src/user/user.controller'; 
 import { UserService } from '../src/user/user.service'; 
 import { NivelDeAcesso } from '@prisma/client'; 
+import { AuthService } from '../src/auth/auth.service';
 
 const mockUserService = {
   createUser: jest.fn(),
@@ -9,6 +10,10 @@ const mockUserService = {
   getUserById: jest.fn(),
   updateUser: jest.fn(),
   deleteUser: jest.fn(),
+};
+
+const mockAuthService = {
+  login: jest.fn(),
 };
 
 describe('UserController', () => {
@@ -19,6 +24,7 @@ describe('UserController', () => {
       controllers: [UserController],
       providers: [
         { provide: UserService, useValue: mockUserService },
+        { provide: AuthService, useValue: mockAuthService },
       ],
     }).compile();
 

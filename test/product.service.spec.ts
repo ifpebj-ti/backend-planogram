@@ -137,4 +137,29 @@ describe('ProductService', () => {
 
     await expect(productService.deleteProduct('1')).rejects.toThrow('Não é possível excluir o produto, pois ele está sendo referenciado por outro registro.');
   });
+
+  it('deve importar uma planilha e retornar JSON', async () => {
+    const mockBuffer = Buffer.from('mock file');
+    const mockJson = [{ nome: 'Produto Teste' }];
+  
+    mockImportarPlanilhaService.importarPlanilha.mockResolvedValue(mockJson);
+  
+    const result = await mockImportarPlanilhaService.importarPlanilha(mockBuffer);
+  
+    expect(mockImportarPlanilhaService.importarPlanilha).toHaveBeenCalledWith(mockBuffer);
+    expect(result).toEqual(mockJson);
+  });
+  
+  it('deve lançar erro ao processar planilha inválida', async () => {
+    const mockBuffer = Buffer.from('mock file');
+  
+    mockImportarPlanilhaService.importarPlanilha.mockRejectedValue(
+      new Error('Erro ao processar o arquivo'),
+    );
+  
+    await expect(mockImportarPlanilhaService.importarPlanilha(mockBuffer)).rejects.toThrow(
+      'Erro ao processar o arquivo',
+    );
+  });
+  
 });

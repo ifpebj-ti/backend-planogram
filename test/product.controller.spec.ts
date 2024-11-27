@@ -13,7 +13,9 @@ describe('ProductController', () => {
     createProduct: jest.fn(),
     updateProduct: jest.fn(),
     deleteProduct: jest.fn(),
+    createProductsFromSheet: jest.fn(),
   };
+  
 
   const mockImportarPlanilhaService = {
     importarPlanilha: jest.fn(),
@@ -108,4 +110,22 @@ describe('ProductController', () => {
     expect(mockProductService.deleteProduct).toHaveBeenCalledWith(productId);
     expect(result).toEqual({ id: productId });
   });
+
+
+  it('deve processar o upload de planilha e criar produtos', async () => {
+    const mockFile = { buffer: Buffer.from('mock file') } as Express.Multer.File;
+    const mockJson = [{ nome: 'Produto Teste' }];
+    const mockResult = [{ id: 1, nome: 'Produto Teste' }];
+  
+    mockImportarPlanilhaService.importarPlanilha.mockResolvedValue(mockJson);
+    mockProductService.createProductsFromSheet.mockResolvedValue(mockResult);
+  
+    const result = await productController.uploadFile(mockFile);
+  
+    expect(mockImportarPlanilhaService.importarPlanilha).toHaveBeenCalledWith(mockFile.buffer);
+    expect(mockProductService.createProductsFromSheet).toHaveBeenCalledWith(mockJson);
+    expect(result).toEqual(mockResult);
+  });
+  
+  
 });
