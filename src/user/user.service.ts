@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { NivelDeAcesso } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class UserService {
@@ -113,4 +114,37 @@ export class UserService {
       throw new Error(`Erro ao atualizar usuário: ${error.message}`);
     }
   }
+
+  async login(email: string, senha: string) {
+    if (!email) {
+      throw new HttpException('Email não fornecido', HttpStatus.BAD_REQUEST);
+    }
+  
+    const user = await this.prisma.usuario.findUnique({
+      where: { email },
+    });
+  
+    if (!user) {
+      throw new HttpException('Credenciais inválidas', HttpStatus.UNAUTHORIZED);
+    }
+  
+    const isPasswordValid = await bcrypt.compare(senha, user.senha);
+    
+    if (!isPasswordValid) {
+      throw new HttpException('Credenciais inválidas', HttpStatus.UNAUTHORIZED);
+    }
+  
+    const token = jwt.sign(
+      { id: user.id, nivel_de_acesso: user.nivel_de_acesso },
+      process.env.JWT_SECRET || 'secret',
+      { expiresIn: '1h' }
+    );
+  
+    return {
+      message: 'Login realizado com sucesso',
+      token,
+      nivel_de_acesso: user.nivel_de_acesso,
+    };
+  }
+  
 }

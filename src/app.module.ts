@@ -13,10 +13,14 @@ import { CategoryService } from './category/category.service';
 import { PrismaService } from './prisma.service';
 import { ImportarPlanilhaService } from './product/importar-planilha.service';
 import { ImportarPlanilhaModule } from './product/importar-planilha.module';
+import { JwtService } from '@nestjs/jwt';
+import { AuthService } from './auth/auth.service';  
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
 
 @Module({
   imports: [CategoryModule, ProductModule, UserModule, ShelfModule,ImportarPlanilhaModule], 
   controllers: [UserController, ProductController, ShelfController],  
-  providers: [UserService, ProductService, CategoryService, PrismaService, ImportarPlanilhaService],  
+  providers: [UserService, ProductService, CategoryService, PrismaService, ImportarPlanilhaService, JwtService, AuthService, JwtAuthGuard],  
+  exports: [AuthService],
 })
 export class AppModule {}
