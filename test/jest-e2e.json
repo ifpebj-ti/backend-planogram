@@ -10,5 +10,8 @@
     "**/*.spec.ts",  
     "**/test/**/*.spec.ts" 
   ],
-  "testPathIgnorePatterns": ["<rootDir>/node_modules/"] 
+  "testPathIgnorePatterns": ["<rootDir>/node_modules/"],
+  "moduleNameMapper": {
+    "^src/(.*)$": "<rootDir>/src/$1"
+  }
 }

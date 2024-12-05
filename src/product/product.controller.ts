@@ -1,4 +1,4 @@
-import {Controller, Post, Body, Get, Param, Put, Delete, UploadedFile, UseInterceptors,BadRequestException} from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Put, Delete, UploadedFile, UseInterceptors, BadRequestException, ParseIntPipe } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImportarPlanilhaService } from './importar-planilha.service';
@@ -9,7 +9,7 @@ export class ProductController {
   constructor(
     private readonly productService: ProductService,
     private readonly importarPlanilhaService: ImportarPlanilhaService,
-  ) {}
+  ) { }
 
   @Post()
   async createProduct(
@@ -31,10 +31,11 @@ export class ProductController {
     return this.productService.getAllProducts();
   }
 
-  @Get(':id')
-  async getById(@Param('id') id: string) {
+  @Get(':id(\\d+)')
+  async getProductById(@Param('id', ParseIntPipe) id: number) {
     return this.productService.getProductById(id);
   }
+
 
   @Put(':id')
   async updateProduct(
@@ -72,5 +73,21 @@ export class ProductController {
     } catch (error) {
       throw new BadRequestException(error.message);
     }
+  }
+
+  @Get('mais-comprados')
+  async getMostPurchasedProducts() {
+    return this.productService.getMostPurchasedProducts();
+  }
+
+  @Get('menos-comprados')
+  async getLeastPurchasedProducts() {
+    return this.productService.getLeastPurchasedProducts();
+  }
+
+
+  @Get('total')
+  async getTotalProducts() {
+    return this.productService.getTotalProducts();
   }
 }

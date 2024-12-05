@@ -1,7 +1,8 @@
-import { Controller, Post, Get, Put, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Post, Get, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { NivelDeAcesso } from '@prisma/client';
 import { AuthService } from '../auth/auth.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('users')
 export class UserController {
@@ -20,11 +21,13 @@ export class UserController {
     return this.userService.createUser(data);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   async getAllUsers() {
     return this.userService.getAllUsers();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async getUserById(@Param('id') id: string) {
     return this.userService.getUserById(id);
