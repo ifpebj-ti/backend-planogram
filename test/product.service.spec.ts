@@ -119,7 +119,7 @@ describe('ProductService', () => {
       usuarioId: 1,
     };
 
-    await expect(productService.updateProduct('1', updatedData)).rejects.toThrow('Produto não encontrado.');
+    await expect(productService.updateProduct('1', updatedData)).rejects.toThrow('Produto não encontrado');
   });
 
   it('deve deletar um produto', async () => {

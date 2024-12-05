@@ -66,23 +66,24 @@ export class ProductService {
     });
   }
 
-  async getProductById(id: string) {
-    const productId = parseInt(id);
-    if (isNaN(productId)) {
+  async getProductById(id: number) {  
+    if (!id || isNaN(id)) {
       throw new Error('ID inválido');
     }
-
+  
     const product = await this.prisma.produto.findUnique({
-      where: { id: productId },
+      where: { id },
     });
-
+  
     if (!product) {
-      throw new Error('Produto não encontrado.');
+      throw new Error('Produto não encontrado');
     }
-
+  
     return product;
   }
-
+  
+  
+  
   async updateProduct(
     id: string,
     data: {
@@ -94,7 +95,14 @@ export class ProductService {
       usuarioId: number;
     },
   ) {
-    const product = await this.getProductById(id);
+    const productId = Number(id);
+  
+    if (isNaN(productId)) {
+      throw new Error('ID inválido');
+    }
+  
+    const product = await this.getProductById(productId);
+  
     return this.prisma.produto.update({
       where: { id: product.id },
       data: {
@@ -107,6 +115,8 @@ export class ProductService {
       },
     });
   }
+  
+
 
   async deleteProduct(productId: string): Promise<any> {
     try {
@@ -120,4 +130,29 @@ export class ProductService {
       throw error;
     }
   }
+
+async getMostPurchasedProducts() {
+  return this.prisma.produto.findMany({
+    orderBy: {
+      venda_por_dia: 'desc', 
+    },
+    take: 10, 
+  });
+}
+
+async getLeastPurchasedProducts() {
+  return this.prisma.produto.findMany({
+    orderBy: {
+      venda_por_dia: 'asc', 
+    },
+    take: 10, 
+  });
+}
+
+async getTotalProducts() {
+  const count = await this.prisma.produto.count();
+  return { total: count }; 
+}
+
+
 }

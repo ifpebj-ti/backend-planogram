@@ -1,8 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserController } from '../src/user/user.controller'; 
-import { UserService } from '../src/user/user.service'; 
-import { NivelDeAcesso } from '@prisma/client'; 
+import { UserController } from '../src/user/user.controller';
+import { UserService } from '../src/user/user.service';
+import { NivelDeAcesso } from '@prisma/client';
 import { AuthService } from '../src/auth/auth.service';
+import { JwtAuthGuard } from '../src/auth/jwt-auth.guard';
+
+jest.mock('../src/auth/jwt-auth.guard', () => ({
+  JwtAuthGuard: jest.fn(() => true), 
+}));
 
 const mockUserService = {
   createUser: jest.fn(),
@@ -26,7 +31,10 @@ describe('UserController', () => {
         { provide: UserService, useValue: mockUserService },
         { provide: AuthService, useValue: mockAuthService },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard) 
+      .useValue({ canActivate: jest.fn(() => true) }) 
+      .compile();
 
     controller = module.get<UserController>(UserController);
   });
