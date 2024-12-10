@@ -12,8 +12,35 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
       - name: Install dependencies
         run: npm install
+        
       - name: Run lint
         run: npm run lint
+
+  build-and-deploy:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and tag Docker image
+        run: |
+          docker build -t mariagabrielly/back-planograma:latest .
+          docker tag mariagabrielly/back-planograma:latest mariagabrielly/back-planograma:latest
+
+      - name: Push Docker image to Docker Hub
+        run: docker push mariagabrielly/back-planograma:latest
+
+      - name: Trigger Portainer Webhook
+        run: curl -X POST "${{ secrets.PORTAINER_WEBHOOK }}"
