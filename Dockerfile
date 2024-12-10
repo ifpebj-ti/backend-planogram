@@ -12,8 +12,8 @@ RUN npm install -g dotenv-cli
 
 COPY . .
 
-RUN npx prisma migrate dev && npx prisma generate
+RUN npx prisma generate
 
 EXPOSE 3001
 
-CMD [ "npm", "run", "start:dev" ]
+CMD [ "npm", "run", "npx prisma migrate dev && start:dev" ]
