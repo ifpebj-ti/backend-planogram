@@ -37,16 +37,16 @@ describe('UserService', () => {
       const userData = {
         nome: 'Maria Silva',
         email: 'maria.silva@example.com',
-        senha: 'senhaSegura',
+        senha: 'SenhaSegura123',  
         nivel_de_acesso: NivelDeAcesso.admin,
       };
-
+  
       jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashedPassword');
       mockPrismaService.usuario.create.mockResolvedValue(userData);
-
+  
       const result = await service.createUser(userData);
-
-      expect(bcrypt.hash).toHaveBeenCalledWith('senhaSegura', 10);
+  
+      expect(bcrypt.hash).toHaveBeenCalledWith('SenhaSegura123', 12);
       expect(mockPrismaService.usuario.create).toHaveBeenCalledWith({
         data: {
           nome: userData.nome,
@@ -58,6 +58,7 @@ describe('UserService', () => {
       expect(result).toEqual(userData);
     });
   });
+  
 
   describe('getAllUsers', () => {
     it('deve retornar todos os usuários', async () => {
