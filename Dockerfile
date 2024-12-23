@@ -1,5 +1,7 @@
 FROM node:18-alpine
 
+RUN apt-get update && apt-get install -y libssl-dev
+
 WORKDIR /usr/appBackend
 
 COPY package*.json ./
