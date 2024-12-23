@@ -1,11 +1,11 @@
-version: '3.7'
+version: '3.8'
 
 services:
   postgres:
     image: postgres:14-alpine
-    container_name: dbpostgres
+    container_name: postgres
     ports:
-      - 5432:5432
+      - "5432:5432"
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -22,17 +22,18 @@ services:
       dockerfile: Dockerfile
     container_name: back-planograma
     environment:
-      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@dbpostgres:5432/${POSTGRES_DB}"
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public"
     ports:
-      - "3001:3001"
+      - "8080:8080"
     depends_on:
       - postgres
+    restart: always
     networks:
       - planograma-network
 
 volumes:
   pgdata:
-    driver: bridge    
+    driver: local   
 
 networks:
   planograma-network:
