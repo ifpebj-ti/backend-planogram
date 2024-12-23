@@ -49,11 +49,11 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          docker build -t mariagabrielly/back-planograma:latest .
-          docker tag mariagabrielly/back-planograma:latest mariagabrielly/back-planograma:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/back-planograma:latest .
+          docker tag ${{ secrets.DOCKER_USERNAME }}/back-planograma:latest ${{ secrets.DOCKER_USERNAME }}/back-planograma:latest
 
       - name: Push Docker image to Docker Hub
-        run: docker push mariagabrielly/back-planograma:latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/back-planograma:latest
 
       - name: Trigger Portainer Webhook
         run: curl -X POST "${{ secrets.PORTAINER_WEBHOOK }}"
