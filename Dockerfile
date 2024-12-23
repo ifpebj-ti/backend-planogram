@@ -1,6 +1,6 @@
 FROM node:18-alpine
 
-RUN apt-get update && apt-get install -y libssl-dev
+RUN apk update && apk add --no-cache openssl-dev
 
 WORKDIR /usr/appBackend
 
