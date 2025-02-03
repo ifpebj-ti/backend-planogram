@@ -18,7 +18,7 @@ Para a contribuição do projeto foi adotado o fluxo de trabalho GitHub Flow.
 Visualizar o passo a passo em: [Fluxo de Contribuição](https://github.com/ifpebj-ti/Backend-Planogram/blob/main/CONTRIBUTING.md)
 
 ## Documentação da API  
-A documentação da API está disponível em: [Swagger - Documentação da API](http://150.230.84.87:8080/api)
+A documentação da API está disponível em: [Swagger - Documentação da API](http://144.22.161.124:8080/api)
 
 ## Wiki
 Para mais informações e documentação do projeto, acesse nossa [Wiki](https://github.com/ifpebj-ti/frontend-planogram/wiki).
