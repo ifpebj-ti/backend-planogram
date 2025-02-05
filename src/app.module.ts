@@ -15,9 +15,10 @@ import { ImportarPlanilhaService } from './product/importar-planilha.service';
 import { ImportarPlanilhaModule } from './product/importar-planilha.module';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth/auth.service';  
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [CategoryModule, ProductModule, UserModule, ShelfModule,ImportarPlanilhaModule], 
+  imports: [ConfigModule.forRoot(),CategoryModule, ProductModule, UserModule, ShelfModule,ImportarPlanilhaModule], 
   controllers: [UserController, ProductController, ShelfController],  
   providers: [UserService, ProductService, CategoryService, PrismaService, ImportarPlanilhaService, JwtService, AuthService],  
   exports: [AuthService],

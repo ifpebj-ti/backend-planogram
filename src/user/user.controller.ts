@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Put, Delete, Param, Body, UseGuards } from '@nestjs/common'; 
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -10,6 +10,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @ApiOperation({ summary: 'Criar um usuário' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiBody({
     description: 'Dados para criação do usuário',
     schema: {
@@ -29,6 +31,8 @@ export class UserController {
   }
 
   @ApiOperation({ summary: 'Criar múltiplos usuários' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiBody({
     description: 'Lista de usuários para criação',
     schema: {
@@ -39,7 +43,7 @@ export class UserController {
           nome: { type: 'string', example: 'Usuário Teste' },
           email: { type: 'string', example: 'teste@teste.com' },
           senha: { type: 'string', example: 'Senha123' },
-          nivel_de_acesso: { type: 'string', enum: ['ADMIN', 'USUARIO'], example: 'USUARIO' },
+          nivel_de_acesso: { type: 'string', enum: ['admin', 'common'], example: 'admim' },
         },
       },
     },
@@ -70,6 +74,8 @@ export class UserController {
   }
 
   @ApiOperation({ summary: 'Atualizar um usuário' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiBody({
     description: 'Dados para atualização do usuário',
     schema: {
@@ -78,7 +84,7 @@ export class UserController {
         nome: { type: 'string', example: 'Novo Nome' },
         email: { type: 'string', example: 'novoemail@teste.com' },
         senha: { type: 'string', example: 'Senha456' },
-        nivel_de_acesso: { type: 'string', enum: ['ADMIN', 'USUARIO'], example: 'ADMIN' },
+        nivel_de_acesso: { type: 'string', enum: ['admin', 'common'], example: 'admim' },
       },
     },
   })

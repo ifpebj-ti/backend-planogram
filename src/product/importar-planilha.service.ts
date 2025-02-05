@@ -8,7 +8,10 @@ export class ImportarPlanilhaService {
       const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const json = XLSX.utils.sheet_to_json(worksheet);
+      const json = XLSX.utils.sheet_to_json(worksheet).map((row: any) => ({
+        ...row,
+        preco: parseFloat(row.preco),
+      }));
       return json;
     } catch (error) {
       throw new Error('Erro ao processar o arquivo: ' + error.message);
