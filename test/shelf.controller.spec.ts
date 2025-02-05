@@ -1,6 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ShelfController } from '../src/shelf/shelf.controller'; 
-import { ShelfService } from '../src/shelf/shelf.service'; 
+import { ShelfController } from '../src/shelf/shelf.controller';
+import { ShelfService } from '../src/shelf/shelf.service';
+import { AuthModule } from '../src/auth/auth.module';
+import { AuthService } from '../src/auth/auth.service';
+import { JwtAuthGuard } from '../src/auth/jwt-auth.guard';
+
+jest.mock('../src/auth/jwt-auth.guard', () => ({
+  JwtAuthGuard: jest.fn(() => true),
+}));
 
 const mockShelfService = {
   createShelf: jest.fn(),
@@ -10,16 +17,25 @@ const mockShelfService = {
   deleteShelf: jest.fn(),
 };
 
+const mockAuthService = {
+  login: jest.fn(),
+};
+
 describe('ShelfController', () => {
   let controller: ShelfController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [AuthModule],
       controllers: [ShelfController],
       providers: [
         { provide: ShelfService, useValue: mockShelfService },
+        { provide: AuthService, useValue: mockAuthService },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
 
     controller = module.get<ShelfController>(ShelfController);
   });

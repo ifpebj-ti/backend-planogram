@@ -1,11 +1,14 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService
+  ) {}
 
   async login(email: string, senha: string) {
     const user = await this.prisma.usuario.findUnique({ where: { email } });
@@ -20,12 +23,18 @@ export class AuthService {
       throw new HttpException('Credenciais inválidas', HttpStatus.UNAUTHORIZED);
     }
 
-    const token = jwt.sign(
-      { id: user.id, nivel_de_acesso: user.nivel_de_acesso },
-      process.env.JWT_SECRET || 'secret', 
-      { expiresIn: '1h' }
-    );
-
+    interface JwtPayload {
+      id: number;
+      nivel_de_acesso: string;
+    }
+    
+    const payload: JwtPayload = { 
+      id: user.id, 
+      nivel_de_acesso: user.nivel_de_acesso 
+    };
+    
+    const token = this.jwtService.sign(payload);
+    
     return {
       message: 'Login realizado com sucesso',
       token,

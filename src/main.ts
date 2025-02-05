@@ -7,6 +7,13 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,POST,PUT,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Authorization',
+  });
+  
+
   app.use(express.json({ limit: '1000mb' }));
   app.use(express.urlencoded({ limit: '1000mb', extended: true }));
 
@@ -25,8 +32,12 @@ async function bootstrap() {
     .addBearerAuth() 
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document); 
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document, {
+      swaggerOptions: {
+        persistAuthorization: true, 
+      },
+    });
 
   await app.listen(8080);
 }

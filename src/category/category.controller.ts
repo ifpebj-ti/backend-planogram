@@ -1,7 +1,7 @@
-import { Controller, Post, Body, Get, Param, Put, Delete } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { Controller, Post, Body, Get, Param, Put, Delete, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { CategoryService } from './category.service';
-import { Categoria } from './category.service';  
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('Categorias')
 @Controller('categories')
@@ -9,6 +9,7 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @ApiOperation({ summary: 'Criar uma nova categoria' })
+  @ApiBearerAuth()
   @ApiBody({
     description: 'Dados para criação da categoria',
     schema: {
@@ -22,27 +23,33 @@ export class CategoryController {
     },
   })
   @ApiResponse({ status: 201, description: 'Categoria criada com sucesso' })
+  @UseGuards(JwtAuthGuard)  
   @Post()
   async createCategory(@Body() body: { nome: string; venda_total_dia: number; prateleiraId: number; usuarioId: number }) {
     return this.categoryService.createCategory(body);
   }
 
   @ApiOperation({ summary: 'Obter todas as categorias' })
+  @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Lista de categorias obtida com sucesso' })
+  @UseGuards(JwtAuthGuard)  
   @Get()
   async getAll() {
     return this.categoryService.getAllCategories();
   }
 
   @ApiOperation({ summary: 'Obter categoria por ID' })
+  @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Categoria encontrada' })
   @ApiResponse({ status: 404, description: 'Categoria não encontrada' })
+  @UseGuards(JwtAuthGuard)  
   @Get(':id')
   async getCategoryById(@Param('id') id: string) {
     return this.categoryService.getCategoryById(id);
   }
 
   @ApiOperation({ summary: 'Atualizar uma categoria' })
+  @ApiBearerAuth()
   @ApiBody({
     description: 'Dados para atualização da categoria',
     schema: {
@@ -57,6 +64,7 @@ export class CategoryController {
   })
   @ApiResponse({ status: 200, description: 'Categoria atualizada com sucesso' })
   @ApiResponse({ status: 404, description: 'Categoria não encontrada' })
+  @UseGuards(JwtAuthGuard)  
   @Put(':id')
   async updateCategory(
     @Param('id') id: string,
@@ -66,8 +74,10 @@ export class CategoryController {
   }
 
   @ApiOperation({ summary: 'Deletar uma categoria' })
+  @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Categoria deletada com sucesso' })
   @ApiResponse({ status: 404, description: 'Categoria não encontrada' })
+  @UseGuards(JwtAuthGuard)  
   @Delete(':id')
   async deleteCategory(@Param('id') id: string) {
     return this.categoryService.deleteCategory(id);

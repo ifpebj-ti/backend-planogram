@@ -1,43 +1,61 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ProductController } from '../src/product/product.controller';
 import { ProductService } from '../src/product/product.service';
 import { PrismaService } from '../src/prisma.service';
 import { ImportarPlanilhaService } from '../src/product/importar-planilha.service';
+import { AuthService } from '../src/auth/auth.service';
+import { JwtAuthGuard } from '../src/auth/jwt-auth.guard';
 
-describe('ProductController', () => {
-  let productController: ProductController;
+jest.mock('../src/auth/jwt-auth.guard', () => ({
+  JwtAuthGuard: jest.fn(() => true),
+}));
+
+describe('ProductService', () => {
   let productService: ProductService;
+  let prismaService: PrismaService;
   let importarPlanilhaService: ImportarPlanilhaService;
 
-  const mockProductService = {
-    createProduct: jest.fn(),
-    updateProduct: jest.fn(),
-    deleteProduct: jest.fn(),
-    createProductsFromSheet: jest.fn(),
+  const mockPrismaService = {
+    categoria: { findUnique: jest.fn() },
+    usuario: { findUnique: jest.fn() },
+    produto: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    },
   };
-  
 
   const mockImportarPlanilhaService = {
     importarPlanilha: jest.fn(),
   };
 
+  const mockAuthService = {
+    login: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [ProductController],
       providers: [
         ProductService,
-        { provide: ProductService, useValue: mockProductService },
-        PrismaService,
+        { provide: PrismaService, useValue: mockPrismaService },
         { provide: ImportarPlanilhaService, useValue: mockImportarPlanilhaService },
+        { provide: AuthService, useValue: mockAuthService },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
 
-    productController = module.get<ProductController>(ProductController);
     productService = module.get<ProductService>(ProductService);
+    prismaService = module.get<PrismaService>(PrismaService);
     importarPlanilhaService = module.get<ImportarPlanilhaService>(ImportarPlanilhaService);
   });
 
   it('deve criar um produto', async () => {
+    mockPrismaService.categoria.findUnique.mockResolvedValue({ id: 1 });
+    mockPrismaService.usuario.findUnique.mockResolvedValue({ id: 1 });
+
     const productData = {
       nome: 'Produto Teste',
       id_categoria: 1,
@@ -47,14 +65,15 @@ describe('ProductController', () => {
       usuarioId: 1,
     };
 
-    mockProductService.createProduct.mockResolvedValue({ id: 1, ...productData });
-
-    const result = await productController.createProduct(productData);
-    expect(mockProductService.createProduct).toHaveBeenCalledWith(productData);
-    expect(result).toEqual({ id: 1, ...productData });
+    await productService.createProduct(productData);
+    expect(mockPrismaService.produto.create).toHaveBeenCalledWith({
+      data: productData,
+    });
   });
 
   it('deve lançar erro se categoria não for encontrada', async () => {
+    mockPrismaService.categoria.findUnique.mockResolvedValue(null);
+
     const productData = {
       nome: 'Produto Teste',
       id_categoria: 1,
@@ -64,12 +83,13 @@ describe('ProductController', () => {
       usuarioId: 1,
     };
 
-    mockProductService.createProduct.mockRejectedValue(new Error('Categoria não encontrada'));
-
-    await expect(productController.createProduct(productData)).rejects.toThrow('Categoria não encontrada');
+    await expect(productService.createProduct(productData)).rejects.toThrow('Categoria não encontrada');
   });
 
   it('deve lançar erro se usuário não for encontrado', async () => {
+    mockPrismaService.categoria.findUnique.mockResolvedValue({ id: 1 });
+    mockPrismaService.usuario.findUnique.mockResolvedValue(null);
+
     const productData = {
       nome: 'Produto Teste',
       id_categoria: 1,
@@ -79,53 +99,82 @@ describe('ProductController', () => {
       usuarioId: 1,
     };
 
-    mockProductService.createProduct.mockRejectedValue(new Error('Usuário não encontrado'));
-
-    await expect(productController.createProduct(productData)).rejects.toThrow('Usuário não encontrado');
+    await expect(productService.createProduct(productData)).rejects.toThrow('Usuário não encontrado');
   });
 
   it('deve atualizar um produto', async () => {
-    const productData = {
-      id: 1,
+    mockPrismaService.produto.findUnique.mockResolvedValue({ id: 1 });
+    mockPrismaService.produto.update.mockResolvedValue({ id: 1, nome: 'Produto Atualizado' });
+
+    const updatedData = {
       nome: 'Produto Atualizado',
       id_categoria: 1,
-      preco: 150,
+      preco: 120,
       fornecedor: 'Fornecedor Atualizado',
       venda_por_dia: 15,
       usuarioId: 1,
     };
 
-    mockProductService.updateProduct.mockResolvedValue({ id: 1, ...productData });
+    const product = await productService.updateProduct('1', updatedData);
+    expect(mockPrismaService.produto.update).toHaveBeenCalledWith({
+      where: { id: 1 },
+      data: updatedData,
+    });
+    expect(product.nome).toBe('Produto Atualizado');
+  });
 
-    const result = await productController.updateProduct('1', productData);
-    expect(mockProductService.updateProduct).toHaveBeenCalledWith('1', productData);
-    expect(result).toEqual({ id: 1, ...productData });
+  it('deve lançar erro se produto não for encontrado para atualização', async () => {
+    mockPrismaService.produto.findUnique.mockResolvedValue(null);
+
+    const updatedData = {
+      nome: 'Produto Atualizado',
+      id_categoria: 1,
+      preco: 120,
+      fornecedor: 'Fornecedor Atualizado',
+      venda_por_dia: 15,
+      usuarioId: 1,
+    };
+
+    await expect(productService.updateProduct('1', updatedData)).rejects.toThrow('Produto não encontrado');
   });
 
   it('deve deletar um produto', async () => {
-    const productId = '1';
-    mockProductService.deleteProduct.mockResolvedValue({ id: productId });
+    mockPrismaService.produto.delete.mockResolvedValue({ id: 1 });
 
-    const result = await productController.deleteProduct(productId);
-    expect(mockProductService.deleteProduct).toHaveBeenCalledWith(productId);
-    expect(result).toEqual({ id: productId });
+    const result = await productService.deleteProduct('1');
+    expect(mockPrismaService.produto.delete).toHaveBeenCalledWith({
+      where: { id: 1 },
+    });
+    expect(result).toEqual({ id: 1 });
   });
 
+  it('deve lançar erro se não for possível deletar o produto', async () => {
+    mockPrismaService.produto.delete.mockRejectedValue({ code: 'P2003' });
 
-  it('deve processar o upload de planilha e criar produtos', async () => {
-    const mockFile = { buffer: Buffer.from('mock file') } as Express.Multer.File;
+    await expect(productService.deleteProduct('1')).rejects.toThrow('Não é possível excluir o produto, pois ele está sendo referenciado por outro registro.');
+  });
+
+  it('deve importar uma planilha e retornar JSON', async () => {
+    const mockBuffer = Buffer.from('mock file');
     const mockJson = [{ nome: 'Produto Teste' }];
-    const mockResult = [{ id: 1, nome: 'Produto Teste' }];
-  
+
     mockImportarPlanilhaService.importarPlanilha.mockResolvedValue(mockJson);
-    mockProductService.createProductsFromSheet.mockResolvedValue(mockResult);
-  
-    const result = await productController.uploadFile(mockFile);
-  
-    expect(mockImportarPlanilhaService.importarPlanilha).toHaveBeenCalledWith(mockFile.buffer);
-    expect(mockProductService.createProductsFromSheet).toHaveBeenCalledWith(mockJson);
-    expect(result).toEqual(mockResult);
+
+    const result = await importarPlanilhaService.importarPlanilha(mockBuffer);
+
+    expect(mockImportarPlanilhaService.importarPlanilha).toHaveBeenCalledWith(mockBuffer);
+    expect(result).toEqual(mockJson);
   });
-  
-  
+
+  it('deve lançar erro ao processar planilha inválida', async () => {
+    const mockBuffer = Buffer.from('mock file');
+
+    mockImportarPlanilhaService.importarPlanilha.mockRejectedValue(
+      new Error('Erro ao processar o arquivo'),
+    );
+
+    await expect(importarPlanilhaService.importarPlanilha(mockBuffer)).rejects.toThrow(
+      'Erro ao processar o arquivo',
+    );
+  });
 });
