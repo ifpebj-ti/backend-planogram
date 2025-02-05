@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:18-alpine3.16
 
 WORKDIR /usr/appBackend
 
@@ -12,8 +12,8 @@ RUN npm install -g dotenv-cli
 
 COPY . .
 
-RUN npx prisma migrate dev && npx prisma generate
+RUN npx prisma generate
 
-EXPOSE 3001
+EXPOSE 8080
 
-CMD [ "npm", "run", "start:dev" ]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:dev"]
