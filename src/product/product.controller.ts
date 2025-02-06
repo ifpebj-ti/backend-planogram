@@ -91,9 +91,20 @@ export class ProductController {
   }
 
   @ApiOperation({ summary: 'Upload de planilha de produtos' })
-  @ApiConsumes('multipart/form-data') 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiConsumes('multipart/form-data') 
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        planilha: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @ApiResponse({ status: 201, description: 'Planilha importada com sucesso' })
   @Post('upload-planilha')
   @UseInterceptors(FileInterceptor('planilha'))
@@ -101,14 +112,17 @@ export class ProductController {
     if (!file) {
       throw new BadRequestException('Nenhum arquivo enviado');
     }
-  
+
     try {
       const jsonData = await this.importarPlanilhaService.importarPlanilha(file.buffer);
-      return this.productService.createProductsFromSheet(jsonData);
+
+      const result = await this.productService.createProductsFromSheet(jsonData);
+      return result;
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
+
 
   @ApiOperation({ summary: 'Obter produtos mais comprados' })
   @ApiBearerAuth()
