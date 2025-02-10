@@ -52,6 +52,17 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/back-planograma:latest .
           docker tag ${{ secrets.DOCKER_USERNAME }}/back-planograma:latest ${{ secrets.DOCKER_USERNAME }}/back-planograma:latest
 
+      - name: Install Docker Scout
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/docker/scout-cli/main/install.sh | sh
+          export PATH=$HOME/.docker/cli-plugins:$PATH
+          docker scout version
+
+      - name: Scan image with Docker Scout
+        run: |
+          docker scout quickview ${{ secrets.DOCKER_USERNAME }}/back-planograma:latest
+          docker scout cves ${{ secrets.DOCKER_USERNAME }}/back-planograma:latest
+          
       - name: Push Docker image to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/back-planograma:latest
 
