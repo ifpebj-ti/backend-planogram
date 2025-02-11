@@ -8,11 +8,13 @@ COPY tsconfig.json ./
 
 RUN npm install
 
-RUN npm install -g dotenv-cli
-
 COPY . .
 
 RUN npx prisma generate
+
+RUN npx nest --version
+
+RUN npm run build
 
 EXPOSE 8080
 
