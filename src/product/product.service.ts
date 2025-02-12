@@ -10,6 +10,7 @@ export class ProductService {
     id_categoria: number;
     preco: number;
     fornecedor: string;
+    quantidade: number;
     venda_por_dia: number;
     usuarioId: number;
   }) {
@@ -33,6 +34,7 @@ export class ProductService {
         id_categoria: data.id_categoria,
         preco: data.preco,
         fornecedor: data.fornecedor,
+        quantidade: data.quantidade,
         venda_por_dia: data.venda_por_dia,
         usuarioId: data.usuarioId,
       },
@@ -48,6 +50,7 @@ export class ProductService {
         id_categoria: data.id_categoria,
         preco: data.preco,
         fornecedor: data.fornecedor,
+        quantidade: data.quantidade,
         venda_por_dia: data.venda_por_dia,
         usuarioId: data.usuarioId,
       });
@@ -91,6 +94,7 @@ export class ProductService {
       id_categoria: number;
       preco: number;
       fornecedor: string;
+      quantidade: number;
       venda_por_dia: number;
       usuarioId: number;
     },
@@ -110,6 +114,7 @@ export class ProductService {
         id_categoria: data.id_categoria,
         preco: data.preco,
         fornecedor: data.fornecedor,
+        quantidade: data.quantidade,
         venda_por_dia: data.venda_por_dia,
         usuarioId: data.usuarioId,
       },
@@ -131,23 +136,33 @@ export class ProductService {
     }
   }
 
-async getMostPurchasedProducts() {
-  return this.prisma.produto.findMany({
-    orderBy: {
-      venda_por_dia: 'desc', 
-    },
-    take: 10, 
-  });
-}
+  async getMostPurchasedProducts() {
+    return this.prisma.produto.findMany({
+      select: {
+        nome: true,
+        venda_por_dia: true,
+      },
+      orderBy: {
+        venda_por_dia: 'desc',
+      },
+      take: 1,
+    });
+  }
+  
 
-async getLeastPurchasedProducts() {
-  return this.prisma.produto.findMany({
-    orderBy: {
-      venda_por_dia: 'asc', 
-    },
-    take: 10, 
-  });
-}
+  async getLeastPurchasedProducts() {
+    return this.prisma.produto.findMany({
+      select: {
+        nome: true,
+        venda_por_dia: true,
+      },
+      orderBy: {
+        venda_por_dia: 'asc',
+      },
+      take: 1,
+    });
+  }
+  
 
 async getTotalProducts() {
   const count = await this.prisma.produto.count();
@@ -155,4 +170,18 @@ async getTotalProducts() {
 }
 
 
+
+async getProductsByCategoryDetailed(categoryId: number) {
+  const products = await this.prisma.produto.findMany({
+    where: {
+      id_categoria: categoryId,
+    },
+    select: {
+      nome: true,
+      quantidade: true,
+    },
+  });
+
+  return products;
+}
 }

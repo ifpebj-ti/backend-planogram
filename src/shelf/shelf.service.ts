@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class ShelfService {
+
   constructor(private readonly prisma: PrismaService) {}
 
   async createShelf(data: { nome: string }) {
@@ -73,4 +74,57 @@ export class ShelfService {
       throw new Error(`Erro ao deletar prateleira: ${error.message}`);
     }
   }
+  
+  
+  async getProductsByShelfDetailed(prateleiraId: number) {
+    const categorias = await this.prisma.categoria.findMany({
+      where: { id_prateleira: prateleiraId },
+      include: {
+        produtos: {
+          select: {
+            id: true,
+            nome: true,
+            quantidade: true,
+            venda_por_dia: true,
+          },
+        },
+      },
+    });
+  
+    return categorias.flatMap(categoria =>
+      categoria.produtos.map(produto => ({
+        cod_slot: categoria.id.toString().padStart(4, '0'),
+        produto: produto.nome,
+        quantidade: produto.quantidade,
+        saida: produto.venda_por_dia,
+      }))
+    );
+  }
+  
+  async getShelfSlots(shelfId: number) {
+    return this.prisma.categoria.findMany({
+      where: { id_prateleira: shelfId },
+      select: {
+        produtos: {
+          select: {
+            nome: true,
+            quantidade: true,
+          },
+        },
+      },
+    });
+  }
+  
+  
+  /*async getShelfTotalProducts(prateleiraId: number) {
+    const categorias = await this.prisma.categoria.findMany({
+      where: { id_prateleira: prateleiraId },
+      include: { produtos: { select: { quantidade: true } } },
+    });
+  
+    const totalProdutos = categorias.flatMap(c => c.produtos).reduce((total, p) => total + p.quantidade, 0);
+  
+    return { prateleira_id: prateleiraId, total_produtos: totalProdutos };
+  }*/
+  
 }

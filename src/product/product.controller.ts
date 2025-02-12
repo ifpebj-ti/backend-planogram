@@ -26,6 +26,7 @@ export class ProductController {
         id_categoria: { type: 'number', example: 1 },
         preco: { type: 'number', example: 100.5 },
         fornecedor: { type: 'string', example: 'Fornecedor A' },
+        quantidade: {type: 'number', example: 20},
         venda_por_dia: { type: 'number', example: 10 },
         usuarioId: { type: 'number', example: 1 },
       },
@@ -33,7 +34,7 @@ export class ProductController {
   })
   @ApiResponse({ status: 201, description: 'Produto criado com sucesso' })
   @Post()
-  async createProduct(@Body() createProductDto: { nome: string; id_categoria: number; preco: number; fornecedor: string; venda_por_dia: number; usuarioId: number }) {
+  async createProduct(@Body() createProductDto: { nome: string; id_categoria: number; preco: number; fornecedor: string; quantidade: number; venda_por_dia: number; usuarioId: number }) {
     return this.productService.createProduct(createProductDto);
   }
 
@@ -68,6 +69,7 @@ export class ProductController {
         id_categoria: { type: 'number', example: 2 },
         preco: { type: 'number', example: 120.5 },
         fornecedor: { type: 'string', example: 'Fornecedor B' },
+        quantidade: {type: 'number', example: 20},
         venda_por_dia: { type: 'number', example: 15 },
         usuarioId: { type: 'number', example: 1 },
       },
@@ -76,7 +78,7 @@ export class ProductController {
   @ApiResponse({ status: 200, description: 'Produto atualizado com sucesso' })
   @ApiResponse({ status: 404, description: 'Produto não encontrado' })
   @Put(':id')
-  async updateProduct(@Param('id') id: string, @Body() updateProductDto: { nome: string; id_categoria: number; preco: number; fornecedor: string; venda_por_dia: number; usuarioId: number }) {
+  async updateProduct(@Param('id') id: string, @Body() updateProductDto: { nome: string; id_categoria: number; preco: number; fornecedor: string; quantidade: number; venda_por_dia: number; usuarioId: number }) {
     return this.productService.updateProduct(id, updateProductDto);
   }
 
@@ -150,4 +152,14 @@ export class ProductController {
   async getTotalProducts() {
     return this.productService.getTotalProducts();
   }
+
+
+  @ApiOperation({ summary: 'Obter produtos por categoria com detalhes' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('categoria/:id/detalhados')
+  async getProductsByCategoryDetailed(@Param('id', ParseIntPipe) id: number) {
+    return this.productService.getProductsByCategoryDetailed(id);
+  }
+  
 }

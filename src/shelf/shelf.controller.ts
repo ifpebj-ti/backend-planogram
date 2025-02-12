@@ -73,4 +73,31 @@ export class ShelfController {
   async delete(@Param('id') id: string) {
     return this.shelfService.deleteShelf(id);
   }
+
+  @ApiOperation({ summary: 'Obter lista detalhada de produtos por prateleira' })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'Lista de produtos obtida com sucesso' })
+  @UseGuards(JwtAuthGuard) 
+  @Get(':shelfId/produtos/detalhado')
+  async getProductsByShelfDetailed(@Param('shelfId') shelfId: number) {
+    return this.shelfService.getProductsByShelfDetailed(shelfId);
+  }
+
+  @ApiOperation({ summary: 'Obter todos os slots de uma prateleira' })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'Lista de slots obtida com sucesso' })
+  @UseGuards(JwtAuthGuard) 
+  @Get(':shelfId/slots')
+  async getShelfSlots(@Param('shelfId') shelfId: number) {
+    return this.shelfService.getShelfSlots(shelfId);
+  }
+
+  /*@ApiOperation({ summary: 'Obter o total de produtos em uma prateleira' })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'Total de produtos obtido com sucesso' })
+  @UseGuards(JwtAuthGuard) 
+  @Get(':shelfId/total-produtos')
+  async getShelfTotalProducts(@Param('shelfId') shelfId: number) {
+    return this.shelfService.getShelfTotalProducts(shelfId);
+  }*/
 }
