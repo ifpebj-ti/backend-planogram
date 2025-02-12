@@ -158,4 +158,36 @@ export class UserService {
     }
   }
 
+
+  async recuperarSenha(email: string, novaSenha: string, confirmarSenha: string) {
+    if (!novaSenha || !confirmarSenha) {
+      throw new HttpException('Ambas as senhas devem ser informadas', HttpStatus.BAD_REQUEST);
+    }
+
+    if (novaSenha !== confirmarSenha) {
+      throw new HttpException('As senhas não coincidem', HttpStatus.BAD_REQUEST);
+    }
+
+    if (!PASSWORD_REGEX.test(novaSenha)) {
+      throw new HttpException(
+        'A senha deve conter pelo menos 8 caracteres, incluindo letras maiúsculas, minúsculas e números.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const user = await this.prisma.usuario.findUnique({ where: { email } });
+
+    if (!user) {
+      throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    const senhaCriptografada = await bcrypt.hash(novaSenha, 12);
+
+    await this.prisma.usuario.update({
+      where: { email },
+      data: { senha: senhaCriptografada },
+    });
+
+    return { message: 'Senha redefinida com sucesso' };
+  }
 }
