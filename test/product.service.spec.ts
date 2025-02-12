@@ -45,6 +45,7 @@ describe('ProductService', () => {
       id_categoria: 1,
       preco: 100,
       fornecedor: 'Fornecedor Teste',
+      quantidade: 18,
       venda_por_dia: 10,
       usuarioId: 1,
     };
@@ -63,6 +64,7 @@ describe('ProductService', () => {
       id_categoria: 1,
       preco: 100,
       fornecedor: 'Fornecedor Teste',
+      quantidade: 18,
       venda_por_dia: 10,
       usuarioId: 1,
     };
@@ -79,6 +81,7 @@ describe('ProductService', () => {
       id_categoria: 1,
       preco: 100,
       fornecedor: 'Fornecedor Teste',
+      quantidade: 18,
       venda_por_dia: 10,
       usuarioId: 1,
     };
@@ -95,6 +98,7 @@ describe('ProductService', () => {
       id_categoria: 1,
       preco: 120,
       fornecedor: 'Fornecedor Atualizado',
+      quantidade: 18,
       venda_por_dia: 15,
       usuarioId: 1,
     };
@@ -115,6 +119,7 @@ describe('ProductService', () => {
       id_categoria: 1,
       preco: 120,
       fornecedor: 'Fornecedor Atualizado',
+      quantidade: 18,
       venda_por_dia: 15,
       usuarioId: 1,
     };

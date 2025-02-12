@@ -31,6 +31,7 @@ model Produto {
   categoria      Categoria  @relation(fields: [id_categoria], references: [id])
   preco          Float
   fornecedor     String
+  quantidade     Int?
   venda_por_dia  Int
   usuarioId      Int
   usuario        Usuario    @relation(fields: [usuarioId], references: [id]) // Relacionamento com usuário

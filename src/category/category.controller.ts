@@ -82,4 +82,13 @@ export class CategoryController {
   async deleteCategory(@Param('id') id: string) {
     return this.categoryService.deleteCategory(id);
   }
+
+  @ApiOperation({ summary: 'Obter quantidade de categorias em uma prateleira' })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'Quantidade de categorias obtida com sucesso' })
+  @UseGuards(JwtAuthGuard)  
+  @Get('count/:prateleiraId')
+  async getCategoriaQuantidade(){
+    return this.categoryService.getCategoriaQuantidade();
+  }
 }

@@ -123,4 +123,10 @@ export class CategoryService {
       throw error; 
     }
   }
+
+  async getCategoriaQuantidade(){
+    const count = await this.prisma.categoria.count();
+    return{ total: count} 
+  }
+  
 }  
