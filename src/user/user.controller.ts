@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Put, Delete, Param, Body, UseGuards } from '@nestjs/common'; 
+import { Controller, Post, Get, Put, Delete, Param, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common'; 
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -120,5 +120,26 @@ export class UserController {
   @Post('login')
   async login(@Body() data: any) {
     return this.userService.login(data.email, data.senha);
+  }
+
+  @ApiOperation({ summary: 'Recuperar senha do usuário' })
+  @ApiBody({
+    description: 'Dados para redefinição de senha',
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string', example: 'usuario@teste.com' },
+        novaSenha: { type: 'string', example: 'NovaSenha123' },
+        confirmarSenha: { type: 'string', example: 'NovaSenha123' },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Senha alterada com sucesso' })
+  @ApiResponse({ status: 400, description: 'As senhas não coincidem ou não atendem aos requisitos' })
+  @ApiResponse({ status: 404, description: 'E-mail não encontrado' })
+  @HttpCode(HttpStatus.OK)
+  @Post('recuperar-senha')
+  async recuperarSenha(@Body() body: { email: string; novaSenha: string; confirmarSenha: string }) {
+    return this.userService.recuperarSenha(body.email, body.novaSenha, body.confirmarSenha);
   }
 }
