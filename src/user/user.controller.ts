@@ -82,15 +82,14 @@ export class UserController {
       type: 'object',
       properties: {
         nome: { type: 'string', example: 'Novo Nome' },
-        email: { type: 'string', example: 'novoemail@teste.com' },
         senha: { type: 'string', example: 'Senha456' },
-        nivel_de_acesso: { type: 'string', enum: ['admin', 'common'], example: 'admim' },
+        confirmarSenha: { type: 'string', example: 'Senha456' },
       },
     },
   })
   @ApiResponse({ status: 200, description: 'Usuário atualizado com sucesso' })
   @Put(':id')
-  async updateUser(@Param('id') id: string, @Body() data: any) {
+  async updateUser(@Param('id') id: string, @Body() data: { nome?: string; senha?: string; confirmarSenha?: string }) {
     return this.userService.updateUser(id, data);
   }
 
@@ -142,4 +141,6 @@ export class UserController {
   async recuperarSenha(@Body() body: { email: string; novaSenha: string; confirmarSenha: string }) {
     return this.userService.recuperarSenha(body.email, body.novaSenha, body.confirmarSenha);
   }
+
+  
 }
