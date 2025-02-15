@@ -179,9 +179,16 @@ async getProductsByCategoryDetailed(categoryId: number) {
     select: {
       nome: true,
       quantidade: true,
+      venda_por_dia: true,
     },
   });
 
-  return products;
+  return products.map(({ nome, quantidade, venda_por_dia }) => ({
+    nome,
+    quantidade,
+    saida: venda_por_dia, 
+  }));
 }
+
+
 }

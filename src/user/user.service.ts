@@ -58,32 +58,35 @@ export class UserService {
     return user;
   }
 
-  async updateUser(id: string, data: { nome?: string; email?: string; senha?: string; nivel_de_acesso?: NivelDeAcesso }) {
+  async updateUser(id: string, data: { nome?: string; senha?: string; confirmarSenha?: string }) {
     const user = await this.getUserById(id);
     if (!user) throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
-
-    const updateData: { nome?: string; email?: string; senha?: string; nivel_de_acesso?: NivelDeAcesso } = {};
-
+  
+    const updateData: { nome?: string; senha?: string } = {};
+  
     if (data.nome) updateData.nome = data.nome;
-    if (data.email) updateData.email = data.email;
-    if (data.nivel_de_acesso) updateData.nivel_de_acesso = data.nivel_de_acesso;
-
+  
     if (data.senha) {
+      if (data.senha !== data.confirmarSenha) {
+        throw new HttpException('As senhas não coincidem', HttpStatus.BAD_REQUEST);
+      }
+  
       if (!PASSWORD_REGEX.test(data.senha)) {
         throw new HttpException(
           'A senha deve conter pelo menos 8 caracteres, incluindo letras maiúsculas, minúsculas e números.',
           HttpStatus.BAD_REQUEST,
         );
       }
+  
       updateData.senha = await bcrypt.hash(data.senha, 12);
     }
-
+  
     return this.prisma.usuario.update({
       where: { id: Number(id) },
       data: updateData,
     });
   }
-
+  
   async login(email: string, senha: string) {
     if (!email || !senha) {
       throw new HttpException('Email e senha são obrigatórios', HttpStatus.BAD_REQUEST);
@@ -190,4 +193,5 @@ export class UserService {
 
     return { message: 'Senha redefinida com sucesso' };
   }
+  
 }
