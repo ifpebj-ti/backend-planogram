@@ -68,7 +68,7 @@ export class CategoryController {
   @Put(':id')
   async updateCategory(
     @Param('id') id: string,
-    @Body() body: { nome: string; venda_total_dia: number; prateleiraId: number; usuarioId: number }
+    @Body() body: { nome: string; venda_total_dia: number; prateleiraId?: number; usuarioId?: number }
   ) {
     return this.categoryService.updateCategory(id, body);
   }
@@ -77,7 +77,8 @@ export class CategoryController {
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Categoria deletada com sucesso' })
   @ApiResponse({ status: 404, description: 'Categoria não encontrada' })
-  @UseGuards(JwtAuthGuard)  
+  @ApiResponse({ status: 400, description: 'Não é possível excluir a categoria, pois está sendo referenciada por outro registro' })
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async deleteCategory(@Param('id') id: string) {
     return this.categoryService.deleteCategory(id);
